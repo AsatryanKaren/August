@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#f3eadf" stroke="#241910" stroke-width="2"/>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#241910" stroke-width="1"/>
+  <text x="32" y="36" text-anchor="middle" font-family="Georgia, serif" font-size="11" letter-spacing="1" fill="#241910">AUG</text>
+</svg>

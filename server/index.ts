@@ -15,6 +15,7 @@ import {
   deleteItem,
   readMenu,
   resetMenu,
+  fillRussianFromSeed,
   seedIfEmpty,
   setReservationStatus,
   updateItem,
@@ -231,6 +232,7 @@ const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1'
 
 await openDb()
 await seedIfEmpty()
+await fillRussianFromSeed()
 await ensureAdmin()
 await connectTelegram()
 

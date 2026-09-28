@@ -671,7 +671,6 @@ export function AdminPage() {
                 {t.add}
               </button>
             </div>
-            <p className="note">{t.adminNote}</p>
             {dishGroups.length === 0 && <p className="empty">{t.empty}</p>}
             {dishGroups.map(({ group, rows }) => (
                 <section key={group.id}>

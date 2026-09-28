@@ -67,8 +67,6 @@ const dict = {
     loginLead: 'Sign in to change the menu. Guests never see this page.',
     password: 'Password',
     loginFailed: 'That login or password does not match.',
-    adminNote:
-      'Names and prices are copied from the printed boards. The boards are Armenian and English, so the Russian button shows the English line.',
     keyHint: 'Demo key',
     enter: 'Enter',
     items: 'Dishes',
@@ -168,8 +166,6 @@ const dict = {
     loginLead: 'Մտեք՝ մենյուն փոխելու համար։ Հյուրերը այս էջը չեն տեսնում։',
     password: 'Գաղտնաբառ',
     loginFailed: 'Մուտքանունը կամ գաղտնաբառը չի համընկնում։',
-    adminNote:
-      'Անուններն ու գները վերցված են տպված ցուցանակներից։ Ցուցանակները հայերեն և անգլերեն են, այդ պատճառով ռուսերեն կոճակը ցույց է տալիս անգլերեն տողը։',
     keyHint: 'Ցուցադրական բանալի',
     enter: 'Մտնել',
     items: 'Ուտեստներ',
@@ -269,8 +265,6 @@ const dict = {
     loginLead: 'Войдите, чтобы менять меню. Гости эту страницу не видят.',
     password: 'Пароль',
     loginFailed: 'Логин или пароль не совпадают.',
-    adminNote:
-      'Названия и цены сняты с печатных щитов. Щиты на армянском и английском, поэтому русская кнопка показывает английскую строку.',
     keyHint: 'Демо-ключ',
     enter: 'Войти',
     items: 'Блюда',

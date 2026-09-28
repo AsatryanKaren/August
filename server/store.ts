@@ -89,6 +89,35 @@ export async function seedIfEmpty() {
   await writeSeed()
 }
 
+/** Fill Russian only where it still copies the English line. Edited Russian stays. */
+export async function fillRussianFromSeed() {
+  const seed = createSeed()
+  for (const item of seed.items) {
+    if (item.name.ru !== item.name.en) {
+      await query(
+        `UPDATE items SET name = jsonb_set(name, '{ru}', to_jsonb($2::text), true)
+         WHERE id = $1 AND coalesce(name->>'ru', '') = coalesce(name->>'en', '')`,
+        [item.id, item.name.ru],
+      )
+    }
+    if (item.description.ru !== item.description.en) {
+      await query(
+        `UPDATE items SET description = jsonb_set(description, '{ru}', to_jsonb($2::text), true)
+         WHERE id = $1 AND coalesce(description->>'ru', '') = coalesce(description->>'en', '')`,
+        [item.id, item.description.ru],
+      )
+    }
+  }
+  for (const category of seed.categories) {
+    if (category.name.ru === category.name.en) continue
+    await query(
+      `UPDATE categories SET name = jsonb_set(name, '{ru}', to_jsonb($2::text), true)
+       WHERE id = $1 AND coalesce(name->>'ru', '') = coalesce(name->>'en', '')`,
+      [category.id, category.name.ru],
+    )
+  }
+}
+
 export async function resetMenu() {
   await writeSeed()
 }

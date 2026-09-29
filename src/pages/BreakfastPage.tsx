@@ -185,10 +185,14 @@ export function BreakfastPage() {
                   {card.stamps} {t.cardOf}
                 </strong>
                 <span>
-                  {t.freeLine} {card.rewards}
+                  {t.freeLine} {card.approved}
                 </span>
               </p>
-              {card.stamps === 10 && <p className="card-full">{t.cardFull}</p>}
+              {card.pending > 0 ? (
+                <p className="card-full">{t.cardPending}</p>
+              ) : (
+                card.stamps === 10 && <p className="card-full">{t.cardFull}</p>
+              )}
               {card.checks.length === 0 ? (
                 <p className="empty">{t.cardEmpty}</p>
               ) : (

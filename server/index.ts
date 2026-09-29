@@ -3,11 +3,13 @@ import { existsSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, normalize } from 'node:path'
 import { serve } from '@hono/node-server'
 import { Hono, type Context, type Next } from 'hono'
+import { bodyLimit } from 'hono/body-limit'
 import { getCookie } from 'hono/cookie'
+import { secureHeaders } from 'hono/secure-headers'
 import { clearSessionCookie, currentUser, ensureAdmin, login, logout, writeSessionCookie } from './auth'
 import { closeDb, openDb } from './db'
 import { normalizePhone } from '../src/phone'
-import { addBreakfastCheck, breakfastCard, deleteBreakfastCheck, listBreakfastCards } from './breakfast'
+import { addBreakfastCheck, approveBreakfast, breakfastCard, breakfastImages, deleteBreakfastCheck, listBreakfastCards } from './breakfast'
 import { listUploads, saveUpload, uploadPath } from './uploads'
 import {
   createItem,
@@ -26,6 +28,8 @@ import type { MenuItem, Offer } from '../src/types'
 
 const app = new Hono()
 const attempts = new Map<string, { count: number; resetAt: number }>()
+const UPLOAD_LIMIT = 10 * 1024 * 1024
+const JSON_LIMIT = 1024 * 1024
 
 function originAllowed(c: Context) {
   const origin = c.req.header('origin')
@@ -43,8 +47,15 @@ function originAllowed(c: Context) {
   }
 }
 
+function clientIp(c: Context) {
+  return c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'local'
+}
+
 function tooMany(ip: string) {
   const now = Date.now()
+  if (attempts.size > 10_000) {
+    for (const [key, value] of attempts) if (value.resetAt < now) attempts.delete(key)
+  }
   const current = attempts.get(ip)
   if (!current || current.resetAt < now) {
     attempts.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 })
@@ -59,6 +70,23 @@ async function requireAuth(c: Context, next: Next) {
   if (!user) return c.json({ error: 'unauthorized' }, 401)
   await next()
 }
+
+app.use(
+  '*',
+  secureHeaders({
+    crossOriginResourcePolicy: false,
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    strictTransportSecurity: 'max-age=15552000',
+  }),
+)
+
+app.use('/api/*', async (c, next) => {
+  const uploading = c.req.method === 'POST' && (c.req.path === '/api/uploads' || c.req.path === '/api/breakfast')
+  return bodyLimit({
+    maxSize: uploading ? UPLOAD_LIMIT : JSON_LIMIT,
+    onError: (ctx) => ctx.json({ error: 'too large' }, 413),
+  })(c, next)
+})
 
 app.use('/api/*', async (c, next) => {
   if (c.req.path === '/api/telegram') return next()
@@ -80,7 +108,10 @@ app.get('/uploads/:name', (c) => {
   })
 })
 
-app.get('/api/uploads', requireAuth, (c) => c.json({ urls: listUploads() }))
+app.get('/api/uploads', requireAuth, async (c) => {
+  const receipts = new Set(await breakfastImages())
+  return c.json({ urls: listUploads().filter((url) => !receipts.has(url)) })
+})
 
 app.post('/api/uploads', requireAuth, async (c) => {
   const body = await c.req.parseBody()
@@ -110,8 +141,7 @@ app.get('/api/me', async (c) => {
 })
 
 app.post('/api/login', async (c) => {
-  const ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'local'
-  if (tooMany(ip)) return c.json({ error: 'invalid' }, 429)
+  if (tooMany(clientIp(c))) return c.json({ error: 'invalid' }, 429)
   const body = (await c.req.json().catch(() => null)) as { login?: string; password?: string } | null
   const session = await login(String(body?.login ?? ''), String(body?.password ?? ''))
   if (!session) return c.json({ error: 'invalid' }, 401)
@@ -152,8 +182,7 @@ app.get('/api/breakfast', async (c) => {
 })
 
 app.post('/api/breakfast', async (c) => {
-  const ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'local'
-  if (tooMany(`breakfast:${ip}`)) return c.json({ error: 'invalid' }, 429)
+  if (tooMany(`breakfast:${clientIp(c)}`)) return c.json({ error: 'invalid' }, 429)
   const body = await c.req.parseBody()
   const file = body.file
   const phone = String(body.phone ?? '')
@@ -169,6 +198,13 @@ app.get('/api/breakfast/admin', requireAuth, async (c) => {
   return c.json(await listBreakfastCards())
 })
 
+app.post('/api/breakfast/approve', requireAuth, async (c) => {
+  const body = (await c.req.json().catch(() => null)) as { phone?: string } | null
+  const card = await approveBreakfast(String(body?.phone ?? ''))
+  if (!card) return c.json({ error: 'invalid' }, 400)
+  return c.json(card)
+})
+
 app.delete('/api/breakfast/:id', requireAuth, async (c) => {
   const removed = await deleteBreakfastCheck(c.req.param('id') ?? '')
   if (!removed) return c.json({ error: 'missing' }, 404)
@@ -176,6 +212,7 @@ app.delete('/api/breakfast/:id', requireAuth, async (c) => {
 })
 
 app.post('/api/reservations', async (c) => {
+  if (tooMany(`reservation:${clientIp(c)}`)) return c.json({ error: 'invalid' }, 429)
   const body = await c.req.json().catch(() => null)
   const reservation = await createReservation(body ?? {})
   if (!reservation) return c.json({ error: 'invalid' }, 400)

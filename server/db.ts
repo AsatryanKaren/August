@@ -37,6 +37,11 @@ const statements = [
     created_at text NOT NULL
   )`,
   `CREATE INDEX IF NOT EXISTS breakfast_checks_phone ON breakfast_checks (phone)`,
+  `CREATE TABLE IF NOT EXISTS breakfast_approvals (
+    phone text PRIMARY KEY,
+    rewards integer NOT NULL,
+    approved_at text NOT NULL
+  )`,
   `CREATE TABLE IF NOT EXISTS reservations (
     id text PRIMARY KEY,
     name text NOT NULL,

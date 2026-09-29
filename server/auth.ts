@@ -5,7 +5,7 @@ import type { Context } from 'hono'
 import { query } from './db'
 
 const COOKIE = 'august_session'
-const WEEK = 60 * 60 * 24 * 14
+const TWO_WEEKS = 60 * 60 * 24 * 14
 
 function adminLogin() {
   return (process.env.ADMIN_LOGIN || 'august').trim().toLowerCase()
@@ -59,6 +59,7 @@ export async function login(name: string, password: string) {
   if (!user) return null
   const match = await bcrypt.compare(password, user.password_hash)
   if (!match) return null
+  await query('DELETE FROM sessions WHERE expires_at <= now()')
   const id = randomBytes(32).toString('hex')
   await query('INSERT INTO sessions (id, user_id, expires_at) VALUES ($1, $2, now() + interval \'14 days\')', [
     id,
@@ -77,7 +78,7 @@ function cookieOptions() {
     path: '/',
     sameSite: 'Lax' as const,
     secure: process.env.NODE_ENV === 'production',
-    maxAge: WEEK,
+    maxAge: TWO_WEEKS,
   }
 }
 

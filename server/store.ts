@@ -161,6 +161,17 @@ function localized(value: unknown, fallback: Localized): Localized {
   }
 }
 
+/** Dish photos come from the admin uploads or the house gallery. */
+function imageOf(value: unknown, fallback = '') {
+  if (typeof value !== 'string' || value.length > 500) return fallback
+  if (value === '' || value.startsWith('/uploads/') || value.startsWith('/photos/')) return value
+  return fallback
+}
+
+function labelOf(value: unknown) {
+  return typeof value === 'string' ? value.trim().slice(0, 80) : ''
+}
+
 function priceOf(value: unknown, fallback = 0) {
   const price = Number(value)
   if (!Number.isFinite(price) || price < 0) return fallback
@@ -176,11 +187,11 @@ export async function createItem(body: Partial<MenuItem>): Promise<MenuItem | nu
     name: localized(body.name, blank),
     description: localized(body.description, blank),
     price: priceOf(body.price),
-    image: typeof body.image === 'string' ? body.image.slice(0, 500) : '',
+    image: imageOf(body.image),
     available: body.available !== false,
     featured: Boolean(body.featured),
   }
-  if (typeof body.priceLabel === 'string' && body.priceLabel.trim()) item.priceLabel = body.priceLabel.trim()
+  if (labelOf(body.priceLabel)) item.priceLabel = labelOf(body.priceLabel)
   const sortRow = await query<{ next: number }>('SELECT coalesce(max(sort), 0) + 1 AS next FROM items')
   await query(
     `INSERT INTO items
@@ -209,18 +220,18 @@ export async function updateItem(id: string, patch: Partial<MenuItem>): Promise<
   const current = toItem(rows[0])
   const next: MenuItem = {
     ...current,
-    ...patch,
     id: current.id,
+    categoryId: patch.categoryId ?? current.categoryId,
     name: patch.name ? localized(patch.name, current.name) : current.name,
     description: patch.description ? localized(patch.description, current.description) : current.description,
     price: patch.price === undefined ? current.price : priceOf(patch.price, current.price),
-    image: patch.image === undefined ? current.image : String(patch.image).slice(0, 500),
+    image: patch.image === undefined ? current.image : imageOf(patch.image, current.image),
     available: patch.available === undefined ? current.available : Boolean(patch.available),
     featured: patch.featured === undefined ? current.featured : Boolean(patch.featured),
   }
   if (patch.priceLabel === undefined) next.priceLabel = current.priceLabel
-  else if (!patch.priceLabel.trim()) delete next.priceLabel
-  else next.priceLabel = patch.priceLabel.trim()
+  else if (!labelOf(patch.priceLabel)) delete next.priceLabel
+  else next.priceLabel = labelOf(patch.priceLabel)
 
   await query(
     `UPDATE items SET category_id = $2, name = $3::jsonb, description = $4::jsonb, price = $5,

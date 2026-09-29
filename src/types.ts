@@ -96,6 +96,8 @@ export interface BreakfastCard {
   count: number
   stamps: number
   rewards: number
+  approved: number
+  pending: number
   checks: BreakfastCheck[]
 }
 
@@ -105,6 +107,8 @@ export interface BreakfastSummary {
   count: number
   stamps: number
   rewards: number
+  approved: number
+  pending: number
   latest: string
 }
 

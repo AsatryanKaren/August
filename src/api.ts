@@ -92,6 +92,9 @@ export const api = {
   breakfastCards() {
     return request<BreakfastSummary[]>('/api/breakfast/admin')
   },
+  approveBreakfast(phone: string) {
+    return request<BreakfastCard>('/api/breakfast/approve', { method: 'POST', body: JSON.stringify({ phone }) })
+  },
   deleteBreakfast(id: string) {
     return request<void>(`/api/breakfast/${id}`, { method: 'DELETE' })
   },

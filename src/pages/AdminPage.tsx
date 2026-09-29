@@ -409,12 +409,28 @@ export function AdminPage() {
                   {openCard.stamps} {t.cardOf}
                 </strong>
                 <span>
-                  {t.freeLine} {openCard.rewards}
+                  {t.freeLine} {openCard.approved}
                 </span>
                 <span>
                   {openCard.count}
                 </span>
               </p>
+              {openCard.pending > 0 ? (
+                <button
+                  type="button"
+                  className="btn solid"
+                  onClick={() => {
+                    void api.approveBreakfast(openCard.phone).then(async (next) => {
+                      setOpenCard(next)
+                      setCardList(await api.breakfastCards())
+                    })
+                  }}
+                >
+                  {t.approveCard}
+                </button>
+              ) : (
+                openCard.approved > 0 && <p className="sent">{t.approvedCard}</p>
+              )}
               <ul className="check-list">
                 {openCard.checks.map((check) => (
                   <li key={check.id}>
@@ -455,7 +471,7 @@ export function AdminPage() {
                     {row.stamps} {t.cardOf}
                   </span>
                   <span>
-                    {t.freeLine} {row.rewards}
+                    {row.pending > 0 ? <em className="to-review">{t.toReview}</em> : `${t.freeLine} ${row.approved}`}
                   </span>
                   <b>{row.count}</b>
                 </button>

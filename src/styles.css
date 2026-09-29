@@ -365,6 +365,8 @@ p { margin: 0; }
 }
 .phone-card strong { font-family: var(--serif); font-size: 22px; font-weight: 520; }
 .phone-card span { color: var(--muted); }
+.phone-card .to-review { font-style: normal; font-weight: 600; color: var(--wood); }
+.card-desk > .btn { justify-self: start; margin: 4px 0 18px; }
 .phone-card b { font-family: var(--serif); font-size: 28px; font-weight: 520; }
 .card-desk h2 { font-size: 36px; margin: 8px 0; }
 .breakfast-page .warn { color: var(--wood); }

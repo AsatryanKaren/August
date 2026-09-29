@@ -69,7 +69,7 @@ function commandOf(text: string) {
 
 function reservationText(reservation: Reservation, statusLine = '') {
   const lines = [
-    'Նոր սեղան',
+    'Նոր ամրագրում',
     '',
     reservation.name,
     reservation.phone,
@@ -120,11 +120,11 @@ async function linkChat(chatId: number, text: string) {
   const linked = chats.includes(chatId)
   if (command === '/stop') {
     if (!linked) {
-      await call('sendMessage', { chat_id: chatId, text: 'Այս հեռախոսը կապված չէր։' })
+      await call('sendMessage', { chat_id: chatId, text: 'Այս հեռախոսը միացված չէր։' })
       return
     }
     await saveChats(chats.filter((id) => id !== chatId))
-    await call('sendMessage', { chat_id: chatId, text: 'Այս հեռախոսն այլևս հայտեր չի ստանա։' })
+    await call('sendMessage', { chat_id: chatId, text: 'Այս հեռախոսն այլևս ամրագրման հայտեր չի ստանա։' })
     return
   }
   if (command === '/connect') {
@@ -137,28 +137,28 @@ async function linkChat(chatId: number, text: string) {
     if (!linked) await saveChats([...chats, chatId])
     await call('sendMessage', {
       chat_id: chatId,
-      text: 'August Cafeteria\nԱյս հեռախոսը կստանա սեղանի հայտերը։ Մյուս հեռախոսները մնում են։',
+      text: 'August Cafeteria\nԱյս հեռախոսը կստանա ամրագրման հայտերը։ Մյուս հեռախոսները նույնպես կշարունակեն ստանալ։',
     })
     return
   }
   if (linked) {
     await call('sendMessage', {
       chat_id: chatId,
-      text: 'Այս հեռախոսն արդեն կապված է։\nՈւրիշ հեռախոս ավելացնելու համար այնտեղ գրեք /connect և ադմինի գաղտնաբառը։',
+      text: 'Այս հեռախոսն արդեն միացված է։\nԱյլ հեռախոս ավելացնելու համար այդ հեռախոսից բոտին գրեք /connect և ադմինի գաղտնաբառը։',
     })
     return
   }
   if (chats.length > 0) {
     await call('sendMessage', {
       chat_id: chatId,
-      text: 'Այս բոտն արդեն միացված է։\nԱյս հեռախոսն ավելացնելու համար գրեք /connect և ադմինի գաղտնաբառը։',
+      text: 'Այս բոտն արդեն միացված է։\nԱյս հեռախոսն ավելացնելու համար բոտին գրեք /connect և ադմինի գաղտնաբառը։',
     })
     return
   }
   await saveChats([chatId])
   await call('sendMessage', {
     chat_id: chatId,
-    text: 'August Cafeteria\nՍեղանի հայտերը կգան այստեղ։\nՈւրիշ հեռախոս ավելացնելու համար այնտեղ գրեք /connect և ադմինի գաղտնաբառը։',
+    text: 'August Cafeteria\nԱմրագրման հայտերն այսուհետ կգան այստեղ։\nԱյլ հեռախոս ավելացնելու համար այդ հեռախոսից բոտին գրեք /connect և ադմինի գաղտնաբառը։',
   })
 }
 

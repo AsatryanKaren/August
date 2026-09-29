@@ -118,6 +118,15 @@ export async function fillRussianFromSeed() {
   }
 }
 
+/** The café details are not editable on the desk, so keep them in step with the seed copy. */
+export async function syncRestaurantFromSeed() {
+  await query(
+    `INSERT INTO settings (id, data) VALUES ('restaurant', $1::jsonb)
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data`,
+    [JSON.stringify(createSeed().restaurant)],
+  )
+}
+
 export async function resetMenu() {
   await writeSeed()
 }

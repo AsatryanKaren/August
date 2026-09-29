@@ -19,6 +19,7 @@ import {
   resetMenu,
   fillRussianFromSeed,
   seedIfEmpty,
+  syncRestaurantFromSeed,
   setReservationStatus,
   updateItem,
 } from './store'
@@ -270,6 +271,7 @@ const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1'
 await openDb()
 await seedIfEmpty()
 await fillRussianFromSeed()
+await syncRestaurantFromSeed()
 await ensureAdmin()
 await connectTelegram()
 

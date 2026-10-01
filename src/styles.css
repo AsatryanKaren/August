@@ -704,7 +704,7 @@ legend { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; mar
   .nav-links { order: 3; width: 100%; gap: 16px; }
   .hero { grid-template-columns: 1fr; }
   .hero-photo, .hero-photo img { min-height: 46svh; height: 46svh; }
-  .hero-copy { padding: 48px 18px 36px; }
+  .hero-copy { padding: calc(var(--nav-h, 77px) + 32px) 18px 36px; }
   .story, .visit, .offer, .reserve, .desk-grid, .split, .book-banner, .book-layout, .card-split { grid-template-columns: 1fr; }
   .book-photo {
     position: static;
